@@ -32,15 +32,15 @@ public class FileHandler1_4Test {
 	// Create small files to test File-> Stream method.
 	@BeforeClass
 	public static void createFiles() throws InterruptedException {
-		
+		String generator = "src/main/resources/text_generator.sh";
 		try {
-			Process p = new ProcessBuilder("doc/text_generator.sh", "5", smallFile).start();
+			Process p = new ProcessBuilder(generator, "5", smallFile).start();
 			p.waitFor();
 			
-			p = new ProcessBuilder("doc/text_generator.sh", "1500", sampleFile).start();
+			p = new ProcessBuilder(generator, "1500", sampleFile).start();
 			p.waitFor();
 			
-//			p = new ProcessBuilder("doc/text_generator.sh", "300000", gigaFile).start();
+//			p = new ProcessBuilder(generator, "300000", gigaFile).start();
 //			p.waitFor();
 		} catch (IOException e) {
 			fail(e.getMessage());
