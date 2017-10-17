@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mule.modules.mulesoftanaplanv2.io.FileHandler;
+import name.tuliopa.files.examples.FileSplitterv3;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
@@ -32,15 +32,15 @@ public class FileSplitterv3Test {
 	// Create small files to test File-> Stream method.
 	@BeforeClass
 	public static void createFiles() throws InterruptedException {
-		
+		String generator = "src/main/resources/text_generator.sh";
 		try {
-			Process p = new ProcessBuilder("doc/text_generator.sh", "5", smallFile).start();
+			Process p = new ProcessBuilder(generator, "5", smallFile).start();
 			p.waitFor();
 			
-			p = new ProcessBuilder("doc/text_generator.sh", "1500", sampleFile).start();
+			p = new ProcessBuilder(generator, "1500", sampleFile).start();
 			p.waitFor();
 			
-			p = new ProcessBuilder("doc/text_generator.sh", "300000", gigaFile).start();
+			p = new ProcessBuilder(generator, "300000", gigaFile).start();
 			p.waitFor();
 		} catch (IOException e) {
 			fail(e.getMessage());
@@ -54,7 +54,7 @@ public class FileSplitterv3Test {
 		try {
 			List<String> persons = Arrays.asList("Max", "Peter", "Pamela", "Alexandra", "Maria", "David");
 			
-			FileHandler.convertStreamToFile(persons.stream(), Paths.get(fileName));
+			FileSplitterv3.convertStreamToFile(persons.stream(), Paths.get(fileName));
 		
 			File f = new File(fileName);
 			assertTrue(f.exists());
@@ -80,7 +80,7 @@ public class FileSplitterv3Test {
 	public void testConvertFileToStream(){
 		
 		try {
-			Stream<String> stream = FileHandler.convertFileToStream(smallFile);
+			Stream<String> stream = FileSplitterv3.convertFileToStream(smallFile);
 			List<String> lines = stream.collect(Collectors.toList());
 			
 			assertEquals(321, lines.size());
@@ -95,11 +95,11 @@ public class FileSplitterv3Test {
 	
 	@Test
 	public void testSplitFile() throws IOException, InterruptedException {
-		System.out.println("small file test");
+		System.out.println("Splitter V3 - small file test");
 		System.gc();
 		printMemoryUsage();
 		
-		List<Path> paths = FileHandler.splitFile(sampleFile, 1);
+		List<Path> paths = FileSplitterv3.splitFile(sampleFile, 1);
 
 		assertEquals(6, paths.size());
 		assertEquals(1048576, Files.size(paths.get(0)));
@@ -138,21 +138,21 @@ public class FileSplitterv3Test {
 	
 	@Test(expected=IOException.class)
 	public void testSplitFileNotFound() throws IOException {
-		FileHandler.splitFile("/tmp/wrongName.txt", 1);
+		FileSplitterv3.splitFile("/tmp/wrongName.txt", 1);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testSplitFileIllegalArgument() throws IOException, IllegalArgumentException {
-		FileHandler.splitFile(sampleFile, -1);
+		FileSplitterv3.splitFile(sampleFile, -1);
 	}
 	
 	@Test
 	public void testSplitHugeFile() throws IOException, InterruptedException {
-		System.out.println("huge file test");
+		System.out.println("Splitter V3 - huge file test");
 		System.gc();
 		printMemoryUsage();
 		
-		List<Path> paths = FileHandler.splitFile(gigaFile, 50);
+		List<Path> paths = FileSplitterv3.splitFile(gigaFile, 50);
 
 		assertEquals(21, paths.size());
 		assertEquals(52428800, Files.size(paths.get(0)));
@@ -178,7 +178,6 @@ public class FileSplitterv3Test {
 	
 	private void printMemoryUsage() {
 		Runtime r = Runtime.getRuntime();
-		//System.out.println("total memory: " + r.totalMemory());
 		System.out.println("Memory  Used: " + (r.totalMemory() - r.freeMemory()));
 	}
 

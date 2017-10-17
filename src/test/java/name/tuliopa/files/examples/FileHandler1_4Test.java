@@ -3,24 +3,18 @@ package name.tuliopa.files.examples;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import name.tuliopa.files.examples.FileSplitter;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class FileHandler1_4Test {
 
@@ -40,8 +34,8 @@ public class FileHandler1_4Test {
 			p = new ProcessBuilder(generator, "1500", sampleFile).start();
 			p.waitFor();
 			
-//			p = new ProcessBuilder(generator, "300000", gigaFile).start();
-//			p.waitFor();
+			p = new ProcessBuilder(generator, "300000", gigaFile).start();
+			p.waitFor();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -135,9 +129,9 @@ public class FileHandler1_4Test {
 		printMemoryUsage();
 	}
 	
-	@Ignore
+	@Test
 	public void testSplitHugeFile() throws IOException, InterruptedException {
-		System.out.println("Huge file test");
+		System.out.println("Read small parts of file - Huge file test");
 		System.gc();
 		printMemoryUsage();
 		
@@ -152,8 +146,7 @@ public class FileHandler1_4Test {
 		assertEquals(52428800, Files.size(Paths.get(paths.get(14))));
 		assertEquals(52428800, Files.size(Paths.get(paths.get(19))));
 		assertEquals(29046793, Files.size(Paths.get(paths.get(20))));
-		
-//		paths.forEach(a -> a.toFile().delete());
+
 		paths.forEach(a -> Paths.get(a).toFile().delete());
 		printMemoryUsage();
 	}
@@ -170,7 +163,6 @@ public class FileHandler1_4Test {
 	
 	private void printMemoryUsage() {
 		Runtime r = Runtime.getRuntime();
-		//System.out.println("total memory: " + r.totalMemory());
 		System.out.println("Memory  Used: " + (r.totalMemory() - r.freeMemory()));
 	}
 

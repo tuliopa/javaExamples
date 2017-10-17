@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class FileSplitterv3 {    
+public class FileSplitterv3 {
     
     public static Stream<String> convertFileToStream(String location) throws IOException {
         return Files.lines(Paths.get(location));
