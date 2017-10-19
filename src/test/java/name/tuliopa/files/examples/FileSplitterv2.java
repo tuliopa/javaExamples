@@ -16,7 +16,7 @@ import name.tuliopa.files.examples.FileSplitter;
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
-public class FileHandler1_4Test {
+public class FileSplitterv2 {
 
 	private static String dir = "/tmp/";
 	private static String smallFile = dir + "smallTestFile.txt";
@@ -49,50 +49,6 @@ public class FileHandler1_4Test {
 		printMemoryUsage();
 		
 		List<String> paths = FileSplitter.splitFile1_4(sampleFile, 1);
-
-		assertEquals(6, paths.size());
-		assertEquals(1048576, Files.size(Paths.get(paths.get(0))));
-		assertEquals(1048576, Files.size(Paths.get(paths.get(1))));
-		assertEquals(1048576, Files.size(Paths.get(paths.get(2))));
-		assertEquals(1048576, Files.size(Paths.get(paths.get(3))));
-		assertEquals(1048576, Files.size(Paths.get(paths.get(4))));
-		assertEquals( 133128, Files.size(Paths.get(paths.get(5))));
-		
-		// concatenate files using unix command to validate integrity.
-		String result = "/tmp/resultConcat.txt";
-		File resultFile = new File(result);
-		
-		List<String> args = new ArrayList<>();
-		args.add("cat");
-		paths.forEach(a -> args.add(a.toString()));
-		
-		ProcessBuilder pb = new ProcessBuilder(args);
-		pb.redirectOutput(resultFile);
-		
-		Process concat = pb.start();
-		concat.waitFor(3, TimeUnit.SECONDS);
-		
-		// Check if files are equal.
-		Process p = new ProcessBuilder("diff", sampleFile, result).start();
-		p.waitFor(3, TimeUnit.SECONDS);
-		int exitValue = p.exitValue();
-		assertEquals(0, exitValue);
-		
-		// Delete multipart files.
-		paths.forEach(a -> new File(a.toString()).delete() );
-		resultFile.delete();
-		
-		printMemoryUsage();
-	}
-	
-
-	@Test
-	public void testSplitFileCopyArrays() throws IOException, InterruptedException {
-		System.out.println("Copy all bytes - small file test");
-		System.gc();
-		printMemoryUsage();
-		
-		List<String> paths = FileSplitter.splitFileCopyArrays(sampleFile, 1);
 
 		assertEquals(6, paths.size());
 		assertEquals(1048576, Files.size(Paths.get(paths.get(0))));
