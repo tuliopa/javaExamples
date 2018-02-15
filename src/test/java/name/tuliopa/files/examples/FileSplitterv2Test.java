@@ -18,11 +18,9 @@ import static org.junit.Assert.assertEquals;
 public class FileSplitterv2Test {
 
 	private static String dir = "/tmp/";
-	//private static String smallFile = dir + "smallTestFile.txt";
 	private static String sampleFile = dir + "sampleFile.txt";
 	private static String gigaFile = dir + "GigaFile.txt";
 	
-	// Create small files to test File-> Stream method.
 	@BeforeClass
 	public static void createFiles() throws InterruptedException {
 		String generator = "src/main/resources/text_generator.sh";

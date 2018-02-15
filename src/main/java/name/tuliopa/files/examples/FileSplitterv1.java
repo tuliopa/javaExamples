@@ -21,6 +21,7 @@ public class FileSplitterv1 {
         RandomAccessFile f = new RandomAccessFile(location, "r");
         byte[] b = new byte[(int)f.length()];
         f.readFully(b);
+        f.close();
         return b;
     }
     
