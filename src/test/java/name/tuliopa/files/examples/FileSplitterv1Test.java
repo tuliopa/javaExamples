@@ -11,27 +11,22 @@ import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import name.tuliopa.files.examples.FileSplitter;
+import name.tuliopa.files.examples.FileSplitterv1;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
-public class FileSplitterv2 {
+public class FileSplitterv1Test {
 
 	private static String dir = "/tmp/";
-	private static String smallFile = dir + "smallTestFile.txt";
 	private static String sampleFile = dir + "sampleFile.txt";
 	private static String gigaFile = dir + "GigaFile.txt";
 	
-	// Create small files to test File-> Stream method.
 	@BeforeClass
 	public static void createFiles() throws InterruptedException {
 		String generator = "src/main/resources/text_generator.sh";
 		try {
-			Process p = new ProcessBuilder(generator, "5", smallFile).start();
-			p.waitFor();
-			
-			p = new ProcessBuilder(generator, "1500", sampleFile).start();
+			Process p = new ProcessBuilder(generator, "1500", sampleFile).start();
 			p.waitFor();
 			
 			p = new ProcessBuilder(generator, "300000", gigaFile).start();
@@ -42,27 +37,11 @@ public class FileSplitterv2 {
 	}
 	
 	@Test
-	public void createSampleFiles() throws InterruptedException {
-		String generator = "src/main/resources/text_generator.sh";
-		try {
-
-			Process p = new ProcessBuilder(generator, "1500", "/Users/aristides/sampleFile.txt").start();
-			p.waitFor();
-
-			p = new ProcessBuilder(generator, "300000", "/Users/aristides/gigaFile.txt").start();
-			p.waitFor();
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
-	
-	@Test
 	public void testSplitFile() throws IOException, InterruptedException {
-		System.out.println("Read small parts of file - small file test");
+		System.out.println("Version 1 - small file test");
 		System.gc();
-		printMemoryUsage();
 		
-		List<String> paths = FileSplitter.splitFile1_4(sampleFile, 1);
+		List<String> paths = FileSplitterv1.splitFile(sampleFile, 1);
 
 		assertEquals(6, paths.size());
 		assertEquals(1048576, Files.size(Paths.get(paths.get(0))));
@@ -101,13 +80,10 @@ public class FileSplitterv2 {
 	
 	@Test
 	public void testSplitHugeFile() throws IOException, InterruptedException {
-		System.out.println("Read small parts of file - Huge file test");
+		System.out.println("Version 1 - Huge file test");
 		System.gc();
-		printMemoryUsage();
 		
-		
-		
-		List<String> paths = FileSplitter.splitFile1_4(gigaFile, 50);
+		List<String> paths = FileSplitterv1.splitFile(gigaFile, 50);
 
 		assertEquals(21, paths.size());
 		assertEquals(52428800, Files.size(Paths.get(paths.get(0))));
@@ -123,9 +99,7 @@ public class FileSplitterv2 {
 	
 	@AfterClass
 	public static void deleteFiles() {
-		File f = new File(smallFile);
-		f.delete();
-		f = new File(sampleFile);
+		File f = new File(sampleFile);
 		f.delete();
 		f = new File(gigaFile);
 		f.delete();

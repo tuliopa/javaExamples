@@ -11,15 +11,14 @@ import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import name.tuliopa.files.examples.FileSplitter;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
-public class FileSplitterv1 {
+public class FileSplitterv2Test {
 
 	private static String dir = "/tmp/";
-	private static String smallFile = dir + "smallTestFile.txt";
+	//private static String smallFile = dir + "smallTestFile.txt";
 	private static String sampleFile = dir + "sampleFile.txt";
 	private static String gigaFile = dir + "GigaFile.txt";
 	
@@ -28,10 +27,7 @@ public class FileSplitterv1 {
 	public static void createFiles() throws InterruptedException {
 		String generator = "src/main/resources/text_generator.sh";
 		try {
-			Process p = new ProcessBuilder(generator, "5", smallFile).start();
-			p.waitFor();
-			
-			p = new ProcessBuilder(generator, "1500", sampleFile).start();
+			Process p = new ProcessBuilder(generator, "1500", sampleFile).start();
 			p.waitFor();
 			
 			p = new ProcessBuilder(generator, "300000", gigaFile).start();
@@ -42,12 +38,11 @@ public class FileSplitterv1 {
 	}
 	
 	@Test
-	public void testSplitFileCopyArrays() throws IOException, InterruptedException {
-		System.out.println("Version 1 - small file test");
+	public void testSplitFile() throws IOException, InterruptedException {
+		System.out.println("Version 2 - Read small parts of file - small file test");
 		System.gc();
-		printMemoryUsage();
 		
-		List<String> paths = FileSplitter.splitFileCopyArrays(sampleFile, 1);
+		List<String> paths = FileSplitterv2.splitFile(sampleFile, 1);
 
 		assertEquals(6, paths.size());
 		assertEquals(1048576, Files.size(Paths.get(paths.get(0))));
@@ -86,11 +81,11 @@ public class FileSplitterv1 {
 	
 	@Test
 	public void testSplitHugeFile() throws IOException, InterruptedException {
-		System.out.println("Version 1 - Huge file test");
+		System.out.println("Version 2 - Read small parts of file - Huge file test");
 		System.gc();
 		printMemoryUsage();
 		
-		List<String> paths = FileSplitter.splitFileCopyArrays(gigaFile, 50);
+		List<String> paths = FileSplitterv2.splitFile(gigaFile, 50);
 
 		assertEquals(21, paths.size());
 		assertEquals(52428800, Files.size(Paths.get(paths.get(0))));
@@ -106,9 +101,7 @@ public class FileSplitterv1 {
 	
 	@AfterClass
 	public static void deleteFiles() {
-		File f = new File(smallFile);
-		f.delete();
-		f = new File(sampleFile);
+		File f = new File(sampleFile);
 		f.delete();
 		f = new File(gigaFile);
 		f.delete();

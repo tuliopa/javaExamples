@@ -1,14 +1,9 @@
 package name.tuliopa.files.examples;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  *
- * @author aristides
+ * @author tuliopa
  */
 
 import java.io.BufferedOutputStream;
@@ -19,9 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileSplitter {
-    
-   
+public class FileSplitterv2 {
     
     /**
      * 
@@ -30,7 +23,7 @@ public class FileSplitter {
      * @return Return a list of files.
      * @throws IOException
      */
-    public static List splitFile1_4(String fileName, int mBperSplit) throws IOException {
+    public static List splitFile(String fileName, int mBperSplit) throws IOException {
         
     	if(mBperSplit <= 0) {
     		throw new IllegalArgumentException("mBperSplit must be more than zero");
@@ -86,64 +79,5 @@ public class FileSplitter {
             bw.write(buf);
         }
     }
-    
-/************** Copy all file in memory **********************/    
-    public static byte[] convertFileToBytes(String location) throws IOException {
-        RandomAccessFile f = new RandomAccessFile(location, "r");
-        byte[] b = new byte[(int)f.length()];
-        f.readFully(b);
-        return b;
-    }
-    
-    static void writeBytes(String name, byte[] buffer) throws IOException {
-        BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(name));
-        bw.write(buffer);
-        bw.close();
-    }
-    
-    /**
-     * 
-     * @param fileName name of file to be splited.
-     * @param mBperSplit number of MB per file.
-     * @return Return a list of files.
-     * @throws IOException
-     */
-    public static List splitFileCopyArrays(String fileName, int mBperSplit) throws IOException {
-        
-    	if(mBperSplit <= 0) {
-    		throw new IllegalArgumentException("mBperSplit must be more than zero");
-    	}
-    	
-        String dir = "/tmp/";
-        String suffix = ".splitPart";
-        List tempFiles = new ArrayList();
-        
-        final long sourceSize = new File(fileName).length();
 
-        int bytesPerSplit = 1024 * 1024 * mBperSplit;
-        long numSplits = sourceSize / bytesPerSplit;
-        long remainingBytes = sourceSize % bytesPerSplit;
-
-      /// Copy arrays
-        byte[] originalbytes = convertFileToBytes(fileName);
-        int i=0;
-        for( ; i < numSplits; i++){
-            //write stream to a file.
-            String tempName = dir + "part" + i + suffix;
-            byte[] b = new byte[bytesPerSplit];
-            System.arraycopy(originalbytes, (i * bytesPerSplit), b, 0, bytesPerSplit);
-            writeBytes(tempName, b);
-            tempFiles.add(tempName);
-        }
-
-        if ( remainingBytes > 0 ){
-            String tempName = dir + "part" + i + suffix;
-            byte[] b = new byte[(int)remainingBytes];
-            System.arraycopy(originalbytes, (i * bytesPerSplit), b, 0, (int)remainingBytes);
-            writeBytes(tempName, b);
-            tempFiles.add(tempName);
-        }
-
-        return tempFiles;
-    }
 }

@@ -97,7 +97,6 @@ public class FileSplitterv3Test {
 	public void testSplitFile() throws IOException, InterruptedException {
 		System.out.println("Splitter V3 - small file test");
 		System.gc();
-		printMemoryUsage();
 		
 		List<Path> paths = FileSplitterv3.splitFile(sampleFile, 1);
 
@@ -150,7 +149,6 @@ public class FileSplitterv3Test {
 	public void testSplitHugeFile() throws IOException, InterruptedException {
 		System.out.println("Splitter V3 - huge file test");
 		System.gc();
-		printMemoryUsage();
 		
 		List<Path> paths = FileSplitterv3.splitFile(gigaFile, 50);
 
