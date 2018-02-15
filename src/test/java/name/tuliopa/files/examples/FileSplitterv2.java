@@ -41,6 +41,20 @@ public class FileSplitterv2 {
 		}
 	}
 	
+	@Test
+	public void createSampleFiles() throws InterruptedException {
+		String generator = "src/main/resources/text_generator.sh";
+		try {
+
+			Process p = new ProcessBuilder(generator, "1500", "/Users/aristides/sampleFile.txt").start();
+			p.waitFor();
+
+			p = new ProcessBuilder(generator, "300000", "/Users/aristides/gigaFile.txt").start();
+			p.waitFor();
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+	}
 	
 	@Test
 	public void testSplitFile() throws IOException, InterruptedException {
