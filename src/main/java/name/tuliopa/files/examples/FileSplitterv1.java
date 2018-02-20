@@ -16,6 +16,8 @@ import java.util.List;
 
 public class FileSplitterv1 {
 
+	private static final String dir = "/tmp/";
+    private static final String suffix = ".splitPart";
 
     private static byte[] convertFileToBytes(String location) throws IOException {
         RandomAccessFile f = new RandomAccessFile(location, "r");
@@ -25,12 +27,20 @@ public class FileSplitterv1 {
         return b;
     }
     
-    private static void writeBytes(String name, byte[] buffer) throws IOException {
-        BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(name));
+    private static void writeBufferToFiles(byte[] buffer, String fileName) throws IOException {
+        BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(fileName));
         bw.write(buffer);
         bw.close();
     }
     
+    private static void copyBytesToPartFile(byte[] originalBytes, List partFiles, int partNum, int bytesPerSplit, int bufferSize) throws IOException{
+        String partFileName = dir + "part" + partNum + suffix;
+        byte[] b = new byte[bufferSize];
+        System.arraycopy(originalBytes, (partNum * bytesPerSplit), b, 0, bufferSize);
+        writeBufferToFiles(b, partFileName);
+        partFiles.add(partFileName);
+    }
+
     /**
      * 
      * @param fileName name of file to be splited.
@@ -43,37 +53,26 @@ public class FileSplitterv1 {
     	if(mBperSplit <= 0) {
     		throw new IllegalArgumentException("mBperSplit must be more than zero");
     	}
-    	
-        String dir = "/tmp/";
-        String suffix = ".splitPart";
-        List tempFiles = new ArrayList();
-        
-        final long sourceSize = new File(fileName).length();
 
+        List partFiles = new ArrayList();
+        final long sourceSize = new File(fileName).length();
         int bytesPerSplit = 1024 * 1024 * mBperSplit;
         long numSplits = sourceSize / bytesPerSplit;
-        long remainingBytes = sourceSize % bytesPerSplit;
+        int remainingBytes = (int) sourceSize % bytesPerSplit;
 
       /// Copy arrays
-        byte[] originalbytes = convertFileToBytes(fileName);
-        int i=0;
-        for( ; i < numSplits; i++){
-            //write stream to a file.
-            String tempName = dir + "part" + i + suffix;
-            byte[] b = new byte[bytesPerSplit];
-            System.arraycopy(originalbytes, (i * bytesPerSplit), b, 0, bytesPerSplit);
-            writeBytes(tempName, b);
-            tempFiles.add(tempName);
+        byte[] originalBytes = convertFileToBytes(fileName);
+        int partNum=0;
+        while(partNum < numSplits){
+            //write bytes to a part file.
+            copyBytesToPartFile(originalBytes, partFiles, partNum, bytesPerSplit, bytesPerSplit);
+            ++partNum;
         }
 
         if ( remainingBytes > 0 ){
-            String tempName = dir + "part" + i + suffix;
-            byte[] b = new byte[(int)remainingBytes];
-            System.arraycopy(originalbytes, (i * bytesPerSplit), b, 0, (int)remainingBytes);
-            writeBytes(tempName, b);
-            tempFiles.add(tempName);
+            copyBytesToPartFile(originalBytes, partFiles, partNum, bytesPerSplit, remainingBytes);
         }
 
-        return tempFiles;
+        return partFiles;
     }
 }
