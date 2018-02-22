@@ -9,15 +9,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static name.tuliopa.files.examples.Utils.*;
-import static org.junit.Assert.*;
+import static name.tuliopa.files.examples.Utils.TestFile;
+import static name.tuliopa.files.examples.Utils.assertSplitFilesIntegrity;
+import static name.tuliopa.files.examples.Utils.createTestFiles;
+import static name.tuliopa.files.examples.Utils.deleteTestFiles;
+import static name.tuliopa.files.examples.Utils.printMemoryUsage;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FileSplitterv3Test {
 
@@ -25,9 +29,9 @@ public class FileSplitterv3Test {
     private static String smallFile = dir + "smallTestFile.txt";
     private static String sampleFile = dir + "sampleFile.txt";
     private static String gigaFile = dir + "GigaFile.txt";
-    private static Utils.TestFile[] testFiles = {new Utils.TestFile(sampleFile, 1500L),
-            new Utils.TestFile(gigaFile, 300000L),
-            new Utils.TestFile(smallFile, 5L)};
+    private static TestFile[] testFiles = {new TestFile(sampleFile, 1500L),
+            new TestFile(gigaFile, 300000L),
+            new TestFile(smallFile, 5L)};
 
     @BeforeClass
     public static void createFiles() throws InterruptedException {

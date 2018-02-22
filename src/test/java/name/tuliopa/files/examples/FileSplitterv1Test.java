@@ -8,11 +8,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static name.tuliopa.files.examples.Utils.*;
+import static name.tuliopa.files.examples.Utils.TestFile;
+import static name.tuliopa.files.examples.Utils.assertSplitFilesIntegrity;
+import static name.tuliopa.files.examples.Utils.createTestFiles;
+import static name.tuliopa.files.examples.Utils.deleteTestFiles;
+import static name.tuliopa.files.examples.Utils.printMemoryUsage;
 import static org.junit.Assert.assertEquals;
 
 public class FileSplitterv1Test {

@@ -8,11 +8,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static name.tuliopa.files.examples.Utils.*;
+import static name.tuliopa.files.examples.Utils.TestFile;
+import static name.tuliopa.files.examples.Utils.assertSplitFilesIntegrity;
+import static name.tuliopa.files.examples.Utils.createTestFiles;
+import static name.tuliopa.files.examples.Utils.deleteTestFiles;
+import static name.tuliopa.files.examples.Utils.printMemoryUsage;
 import static org.junit.Assert.assertEquals;
 
 public class FileSplitterv2Test {
@@ -20,8 +22,8 @@ public class FileSplitterv2Test {
     private static String dir = "/tmp/";
     private static String sampleFile = dir + "sampleFile.txt";
     private static String gigaFile = dir + "GigaFile.txt";
-    private static Utils.TestFile[] testFiles = {new Utils.TestFile(sampleFile, 1500L),
-            new Utils.TestFile(gigaFile, 300000L)};
+    private static TestFile[] testFiles = {new TestFile(sampleFile, 1500L),
+            new TestFile(gigaFile, 300000L)};
 
     @BeforeClass
     public static void createFiles() throws InterruptedException {
