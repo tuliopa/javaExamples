@@ -17,15 +17,18 @@ import java.util.List;
 import java.util.UUID;
 
 public class FileSplitterv3 {
-    
+
+    private static final String dir = "/tmp/";
+    private static final String suffix = ".splitPart";
+
     public static Stream<String> convertFileToStream(String location) throws IOException {
         return Files.lines(Paths.get(location));
     }
-    
+
     public static void convertStreamToFile(Stream<String> data, Path path) throws IOException {
         Files.write(path, (Iterable<String>) data::iterator);
     }
-    
+
     /**
      * Split a file into multiples files.
      * @param fileName Name of file to be splited.
@@ -33,56 +36,43 @@ public class FileSplitterv3 {
      * @throws IOException
      */
     public static List<Path> splitFile(final String fileName, final int mBperSplit) throws IOException {
-        
-    	if(mBperSplit <= 0) {
-    		throw new IllegalArgumentException("mBperSplit must be more than zero");
-    	}
-    	
-        String dir = "/tmp/";
-        String suffix = ".mulePart";
-        List<Path> tempFiles = new ArrayList<>();
-        
-        long sourceSize = Files.size(Paths.get(fileName));
 
-        long bytesPerSplit = 1024l * 1024l * mBperSplit;
-        long numSplits = sourceSize / bytesPerSplit;
+        if(mBperSplit <= 0) {
+            throw new IllegalArgumentException("mBperSplit must be more than zero");
+        }
 
-        long remainingBytes = sourceSize % bytesPerSplit;
-        int i=0;
-        
-        RandomAccessFile fromFile = new RandomAccessFile(fileName, "r");
-        FileChannel      fromChannel = fromFile.getChannel();
+        List<Path> partFiles = new ArrayList<>();
+        final long sourceSize = Files.size(Paths.get(fileName));
+        final long bytesPerSplit = 1024l * 1024l * mBperSplit;
+        final long numSplits = sourceSize / bytesPerSplit;
+        final long remainingBytes = sourceSize % bytesPerSplit;
+        int position=0;
 
-        
-        for( ; i < numSplits; i++){
+        RandomAccessFile sourceFile = new RandomAccessFile(fileName, "r");
+        FileChannel sourceChannel = sourceFile.getChannel();
+
+        for( ; position < numSplits; position++){
             //write multipart files.
-            Path tempName = Paths.get(dir + UUID.randomUUID() + suffix);            
-            RandomAccessFile toFile = new RandomAccessFile(tempName.toFile(), "rw");
-            FileChannel      toChannel = toFile.getChannel();
-
-            fromChannel.position(i * bytesPerSplit);
-            toChannel.transferFrom(fromChannel, 0, bytesPerSplit);
-            toChannel.close();
-            toFile.close();
-            tempFiles.add(tempName);
+            writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, partFiles);
         }
 
         if ( remainingBytes > 0 ){
-            Path tempName = Paths.get(dir + UUID.randomUUID() + suffix);
-            
-            RandomAccessFile toFile = new RandomAccessFile(tempName.toFile(), "rw");
-            FileChannel      toChannel = toFile.getChannel();
-
-            fromChannel.position(i * bytesPerSplit);
-            toChannel.transferFrom(fromChannel, 0, remainingBytes);
-            toChannel.close();
-            toFile.close();
-            tempFiles.add(tempName);
+            writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, partFiles);
         }
-        
-        fromFile.close();
-        fromChannel.close();
-        return tempFiles;
+
+        sourceFile.close();
+        sourceChannel.close();
+        return partFiles;
  	}
-	
+    
+    private static void writePartToFile(long byteSize, long position, FileChannel sourceChannel, List<Path> partFiles) throws IOException {
+        Path fileName = Paths.get(dir + UUID.randomUUID() + suffix);
+        RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");
+        FileChannel toChannel = toFile.getChannel();
+        sourceChannel.position(position);
+        toChannel.transferFrom(sourceChannel, 0, byteSize);
+        toChannel.close();
+        toFile.close();
+        partFiles.add(fileName);
+    }
 }

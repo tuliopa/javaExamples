@@ -1,6 +1,5 @@
 package name.tuliopa.files.examples;
 
-
 /**
  *
  * @author tuliopa
@@ -8,6 +7,7 @@ package name.tuliopa.files.examples;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.io.IOException;
@@ -15,7 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileSplitterv2 {
-    
+
+    private static final String dir = "/tmp/";
+    private static final String suffix = ".splitPart";
+
     /**
      * 
      * @param fileName name of file to be splited.
@@ -25,25 +28,23 @@ public class FileSplitterv2 {
      */
     public static List splitFile(String fileName, int mBperSplit) throws IOException {
         
-    	if(mBperSplit <= 0) {
-    		throw new IllegalArgumentException("mBperSplit must be more than zero");
-    	}
-    	
-        String dir = "/tmp/";
-        String suffix = ".splitPart";
-        List tempFiles = new ArrayList();
-        
+        if(mBperSplit <= 0) {
+            throw new IllegalArgumentException("mBperSplit must be more than zero");
+        }
+
+        List partFiles = new ArrayList();
+
         final long sourceSize = new File(fileName).length();
 
-        long bytesPerSplit = 1024l * 1024l * mBperSplit;
-        long numSplits = sourceSize / bytesPerSplit;
+        final long bytesPerSplit = 1024l * 1024l * mBperSplit;
+        final long numSplits = sourceSize / bytesPerSplit;
         long remainingBytes = sourceSize % bytesPerSplit;
         
         RandomAccessFile raf = new RandomAccessFile(fileName, "r");
-        int maxReadBufferSize = 8 * 1024; //8MB
-        for(int destIx=1; destIx <= numSplits; destIx++) {
-            String tempName = dir + "part"+ destIx + suffix;
-            BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(tempName));
+        int maxReadBufferSize = 8 * 1024; //8KB
+        int partNum;
+        for(partNum=0; partNum < numSplits; partNum++) {
+            BufferedOutputStream bw = newWriteBuffer(partNum, partFiles);
             if(bytesPerSplit > maxReadBufferSize) {
                 long numReads = bytesPerSplit/maxReadBufferSize;
                 long numRemainingRead = bytesPerSplit % maxReadBufferSize;
@@ -57,22 +58,25 @@ public class FileSplitterv2 {
                 readWrite(raf, bw, bytesPerSplit);
             }
             bw.close();
-            tempFiles.add(tempName);
         }
         if(remainingBytes > 0) {
-            String tempName = dir + "part"+ (numSplits+1) + suffix;
-            BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(tempName));
+        	BufferedOutputStream bw = newWriteBuffer(partNum, partFiles);
             readWrite(raf, bw, remainingBytes);
             bw.close();
-            tempFiles.add(tempName);
         }
         raf.close();
         
-        return tempFiles;
+        return partFiles;
+    }
+    
+    private static BufferedOutputStream newWriteBuffer(int partNum, List partFiles) throws FileNotFoundException{
+        String partFileName = dir + "part" + partNum + suffix;
+        partFiles.add(partFileName);
+        return new BufferedOutputStream(new FileOutputStream(partFileName));
     }
     
 
-    static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
+    private static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
         byte[] buf = new byte[(int) numBytes];
         int val = raf.read(buf);
         if(val != -1) {
