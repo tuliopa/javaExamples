@@ -1,7 +1,6 @@
 package name.tuliopa.files.examples;
 
 /**
- *
  * @author tuliopa
  */
 
@@ -20,15 +19,15 @@ public class FileSplitterv2 {
     private static final String suffix = ".splitPart";
 
     /**
-     * 
+     *
      * @param fileName name of file to be splited.
      * @param mBperSplit number of MB per file.
      * @return Return a list of files.
      * @throws IOException
      */
     public static List splitFile(String fileName, int mBperSplit) throws IOException {
-        
-        if(mBperSplit <= 0) {
+
+        if (mBperSplit <= 0) {
             throw new IllegalArgumentException("mBperSplit must be more than zero");
         }
 
@@ -36,50 +35,49 @@ public class FileSplitterv2 {
 
         final long sourceSize = new File(fileName).length();
 
-        final long bytesPerSplit = 1024l * 1024l * mBperSplit;
+        final long bytesPerSplit = 1024L * 1024L * mBperSplit;
         final long numSplits = sourceSize / bytesPerSplit;
         long remainingBytes = sourceSize % bytesPerSplit;
-        
+
         RandomAccessFile raf = new RandomAccessFile(fileName, "r");
         int maxReadBufferSize = 8 * 1024; //8KB
-        int partNum;
-        for(partNum=0; partNum < numSplits; partNum++) {
+        int partNum = 0;
+        for (; partNum < numSplits; partNum++) {
             BufferedOutputStream bw = newWriteBuffer(partNum, partFiles);
-            if(bytesPerSplit > maxReadBufferSize) {
-                long numReads = bytesPerSplit/maxReadBufferSize;
+            if (bytesPerSplit > maxReadBufferSize) {
+                long numReads = bytesPerSplit / maxReadBufferSize;
                 long numRemainingRead = bytesPerSplit % maxReadBufferSize;
-                for(int i=0; i<numReads; i++) {
+                for (int i = 0; i < numReads; i++) {
                     readWrite(raf, bw, maxReadBufferSize);
                 }
-                if(numRemainingRead > 0) {
+                if (numRemainingRead > 0) {
                     readWrite(raf, bw, numRemainingRead);
                 }
-            }else {
+            } else {
                 readWrite(raf, bw, bytesPerSplit);
             }
             bw.close();
         }
-        if(remainingBytes > 0) {
-        	BufferedOutputStream bw = newWriteBuffer(partNum, partFiles);
+        if (remainingBytes > 0) {
+            BufferedOutputStream bw = newWriteBuffer(partNum, partFiles);
             readWrite(raf, bw, remainingBytes);
             bw.close();
         }
         raf.close();
-        
+
         return partFiles;
     }
-    
-    private static BufferedOutputStream newWriteBuffer(int partNum, List partFiles) throws FileNotFoundException{
+
+    private static BufferedOutputStream newWriteBuffer(int partNum, List partFiles) throws FileNotFoundException {
         String partFileName = dir + "part" + partNum + suffix;
         partFiles.add(partFileName);
         return new BufferedOutputStream(new FileOutputStream(partFileName));
     }
-    
 
     private static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
         byte[] buf = new byte[(int) numBytes];
         int val = raf.read(buf);
-        if(val != -1) {
+        if (val != -1) {
             bw.write(buf);
         }
     }
