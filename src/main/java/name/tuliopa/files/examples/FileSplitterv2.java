@@ -6,7 +6,6 @@ package name.tuliopa.files.examples;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.io.IOException;
@@ -32,15 +31,13 @@ public class FileSplitterv2 {
         }
 
         List partFiles = new ArrayList();
-
         final long sourceSize = new File(fileName).length();
-
         final long bytesPerSplit = 1024L * 1024L * mBperSplit;
         final long numSplits = sourceSize / bytesPerSplit;
         long remainingBytes = sourceSize % bytesPerSplit;
-
         RandomAccessFile raf = new RandomAccessFile(fileName, "r");
         int maxReadBufferSize = 8 * 1024; //8KB
+
         int partNum = 0;
         for (; partNum < numSplits; partNum++) {
             BufferedOutputStream bw = newWriteBuffer(partNum, partFiles);
@@ -64,11 +61,10 @@ public class FileSplitterv2 {
             bw.close();
         }
         raf.close();
-
         return partFiles;
     }
 
-    private static BufferedOutputStream newWriteBuffer(int partNum, List partFiles) throws FileNotFoundException {
+    private static BufferedOutputStream newWriteBuffer(int partNum, List partFiles) throws IOException{
         String partFileName = dir + "part" + partNum + suffix;
         partFiles.add(partFileName);
         return new BufferedOutputStream(new FileOutputStream(partFileName));
