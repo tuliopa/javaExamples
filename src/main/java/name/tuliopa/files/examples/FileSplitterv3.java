@@ -1,9 +1,8 @@
 package name.tuliopa.files.examples;
 
 /**
-*
-* @author tuliopa
-*/
+ * @author tuliopa
+ */
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -31,48 +30,46 @@ public class FileSplitterv3 {
 
     /**
      * Split a file into multiples files.
-     * @param fileName Name of file to be splited.
+     *
+     * @param fileName   Name of file to be split.
      * @param mBperSplit maximum number of MB per file.
      * @throws IOException
      */
     public static List<Path> splitFile(final String fileName, final int mBperSplit) throws IOException {
 
-        if(mBperSplit <= 0) {
+        if (mBperSplit <= 0) {
             throw new IllegalArgumentException("mBperSplit must be more than zero");
         }
 
         List<Path> partFiles = new ArrayList<>();
         final long sourceSize = Files.size(Paths.get(fileName));
-        final long bytesPerSplit = 1024l * 1024l * mBperSplit;
+        final long bytesPerSplit = 1024L * 1024L * mBperSplit;
         final long numSplits = sourceSize / bytesPerSplit;
         final long remainingBytes = sourceSize % bytesPerSplit;
-        int position=0;
+        int position = 0;
 
-        RandomAccessFile sourceFile = new RandomAccessFile(fileName, "r");
-        FileChannel sourceChannel = sourceFile.getChannel();
+        try (RandomAccessFile sourceFile = new RandomAccessFile(fileName, "r");
+             FileChannel sourceChannel = sourceFile.getChannel()) {
 
-        for( ; position < numSplits; position++){
-            //write multipart files.
-            writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, partFiles);
+            for (; position < numSplits; position++) {
+                //write multipart files.
+                writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, partFiles);
+            }
+
+            if (remainingBytes > 0) {
+                writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, partFiles);
+            }
         }
-
-        if ( remainingBytes > 0 ){
-            writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, partFiles);
-        }
-
-        sourceFile.close();
-        sourceChannel.close();
         return partFiles;
- 	}
-    
+    }
+
     private static void writePartToFile(long byteSize, long position, FileChannel sourceChannel, List<Path> partFiles) throws IOException {
         Path fileName = Paths.get(dir + UUID.randomUUID() + suffix);
-        RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");
-        FileChannel toChannel = toFile.getChannel();
-        sourceChannel.position(position);
-        toChannel.transferFrom(sourceChannel, 0, byteSize);
-        toChannel.close();
-        toFile.close();
+        try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");
+             FileChannel toChannel = toFile.getChannel()) {
+            sourceChannel.position(position);
+            toChannel.transferFrom(sourceChannel, 0, byteSize);
+        }
         partFiles.add(fileName);
     }
 }
